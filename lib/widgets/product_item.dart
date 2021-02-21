@@ -26,7 +26,7 @@ class ProductItem extends StatelessWidget {
         ),
         footer: GridTileBar(
           backgroundColor: Colors.black87,
-          // Consumer is gone refresh only the part wrap on it
+          // Consumer is gonna refresh only the part wrap on it
           // the child is use if part of the consumer doesn't need to change
           leading: Consumer<Product>(
             builder: (ctx, product, child) => IconButton(
@@ -35,6 +35,19 @@ class ProductItem extends StatelessWidget {
               ),
               onPressed: () {
                 product.toogleFavoriteStatus();
+                Scaffold.of(context).hideCurrentSnackBar();
+                Scaffold.of(context).showSnackBar(
+                  SnackBar(  
+                    content: product.isFavorite ? Text('Item is now favorite!') : Text('Item is now unfavorite'),
+                    duration: Duration(seconds: 2),
+                    action: SnackBarAction(
+                      label: 'UNDO',
+                      onPressed: () {
+                        product.toogleFavoriteStatus();
+                      },
+                    ),
+                  ),
+                );
               },
               color: Theme.of(context).accentColor,
             ),
