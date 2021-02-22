@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import './product.dart';
 
 // with is similar to implements in the angular
@@ -51,17 +53,36 @@ class ProductsProvider with ChangeNotifier {
     return _items.firstWhere((p) => p.id == id);
   }
 
-  void addProduct(Product product) {
-    final newProduct = Product(
-      id: DateTime.now().toString(),
-      title: product.title,
-      description: product.description,
-      price: product.price,
-      imageUrl: product.imageUrl,
-    );
+  Future<void> addProduct(Product product) {
+    const url =
+        'https://shopapp-flutter-7877c-default-rtdb.firebaseio.com/products.json';
+    return http
+        .post(
+      url,
+      body: json.encode(
+        {
+          'title': product.title,
+          'description': product.description,
+          'price': product.price,
+          'imageUrl': product.imageUrl,
+          'isFavorite': product.isFavorite,
+        },
+      ),
+    )
+        .then(
+      (response) {
+        final newProduct = Product(
+          id: json.decode(response.body)['name'],
+          title: product.title,
+          description: product.description,
+          price: product.price,
+          imageUrl: product.imageUrl,
+        );
 
-    _items.insert(0, newProduct);
-    notifyListeners();
+        _items.insert(0, newProduct);
+        notifyListeners();
+      },
+    );
   }
 
   void updateProduct(String id, Product newProduct) {
@@ -69,8 +90,7 @@ class ProductsProvider with ChangeNotifier {
     if (prodIndex >= 0) {
       _items[prodIndex] = newProduct;
       notifyListeners();
-    }
-    else {
+    } else {
       print('Error');
     }
   }
